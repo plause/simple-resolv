@@ -1,21 +1,16 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netdb.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include "config.h"
 
 static void print_addr(struct in_addr *addr)
 {
   fprintf(stdout, "%s\n", inet_ntoa(*addr));
-}
-
-static void print_addr_list(struct in_addr **list)
-{
-  struct in_addr **addresses = list;
-
-  for (; addresses && *addresses; addresses++) {
-    print_addr(*addresses);
-  }
 }
 
 int main(int argc, char **argv)
@@ -40,18 +35,28 @@ int main(int argc, char **argv)
   }
 
   char *hostname = *(argv + optind);
-  struct hostent *hostinfo = gethostbyname(hostname);
+  struct addrinfo *res, *res0;
+  struct addrinfo hints;
 
-  if (hostinfo == NULL) {
-    fprintf(stderr, "Can not resolve %s\n", hostname);
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_RAW;
+
+  int gaierr = getaddrinfo(hostname, NULL, &hints, &res0);
+
+  if (gaierr != 0) {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaierr));
     return 2;
   }
 
-  if (all) {
-    print_addr_list((struct in_addr **) hostinfo->h_addr_list);
-  } else {
-    print_addr((struct in_addr *) hostinfo->h_addr);
+  for (res = res0; res; res = res->ai_next) {
+    print_addr(&(((struct sockaddr_in *) res->ai_addr)->sin_addr));
+
+    if (!all)
+      break;
   }
+
+  freeaddrinfo(res0);
 
   return 0;
 }

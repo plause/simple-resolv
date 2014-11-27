@@ -15,11 +15,13 @@ AC_PROG_CC
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h netdb.h unistd.h])
+AC_CHECK_HEADERS([sys/socket.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
-AC_CHECK_FUNCS([gethostbyname inet_ntoa])
+AC_CHECK_FUNCS([inet_ntoa])
+AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
