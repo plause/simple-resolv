@@ -21,12 +21,12 @@ static void print_address(int af, struct sockaddr *addr)
   fprintf(stdout, "%s\n", inet_ntop(af, saddr, buf, INET6_ADDRSTRLEN));
 }
 
-static struct addrinfo *get_addresses(const char *node)
+static struct addrinfo *get_addresses(int af, const char *node)
 {
   struct addrinfo hints, *res;
 
   memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_family = AF_INET;
+  hints.ai_family = af;
   hints.ai_socktype = SOCK_RAW;
 
   int gaierr = getaddrinfo(node, NULL, &hints, &res);
@@ -41,13 +41,16 @@ static struct addrinfo *get_addresses(const char *node)
 
 int main(int argc, char **argv)
 {
-  int all = 0;
+  int all = 0, af = AF_INET;
   int c;
 
-  while ((c = getopt(argc, argv, "a")) != -1) {
+  while ((c = getopt(argc, argv, "a6")) != -1) {
     switch (c) {
     case 'a':
       all = 1;
+      break;
+    case '6':
+      af = AF_INET6;
       break;
     case '?':
     default:
@@ -56,11 +59,11 @@ int main(int argc, char **argv)
   }
 
   if (argc - optind != 1) {
-    fprintf(stderr, "Usage: %s [-a] HOSTNAME\n", PACKAGE);
+    fprintf(stderr, "Usage: %s [-6] [-a] HOSTNAME\n", PACKAGE);
     return 1;
   }
 
-  struct addrinfo *res, *res0 = get_addresses(*(argv + optind));
+  struct addrinfo *res, *res0 = get_addresses(af, *(argv + optind));
 
   for (res = res0; res; res = res->ai_next) {
     print_address(res->ai_family, (struct sockaddr *) res->ai_addr);
