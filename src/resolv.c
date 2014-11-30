@@ -13,6 +13,24 @@ static void print_addr(struct in_addr *addr)
   fprintf(stdout, "%s\n", inet_ntoa(*addr));
 }
 
+static struct addrinfo *get_addresses(const char *node)
+{
+  struct addrinfo hints, *res;
+
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_RAW;
+
+  int gaierr = getaddrinfo(node, NULL, &hints, &res);
+
+  if (gaierr != 0) {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaierr));
+    exit(EXIT_FAILURE);
+  }
+
+  return res;
+}
+
 int main(int argc, char **argv)
 {
   int all = 0;
@@ -34,20 +52,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  char *hostname = *(argv + optind);
-  struct addrinfo *res, *res0;
-  struct addrinfo hints;
-
-  memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_RAW;
-
-  int gaierr = getaddrinfo(hostname, NULL, &hints, &res0);
-
-  if (gaierr != 0) {
-    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaierr));
-    return 2;
-  }
+  struct addrinfo *res, *res0 = get_addresses(*(argv + optind));
 
   for (res = res0; res; res = res->ai_next) {
     print_addr(&(((struct sockaddr_in *) res->ai_addr)->sin_addr));
