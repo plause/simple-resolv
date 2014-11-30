@@ -8,9 +8,17 @@
 #include <arpa/inet.h>
 #include "config.h"
 
-static void print_addr(struct in_addr *addr)
+static void print_address(int af, struct sockaddr *addr)
 {
-  fprintf(stdout, "%s\n", inet_ntoa(*addr));
+  char buf[INET6_ADDRSTRLEN];
+  void *saddr;
+
+  if (af == AF_INET)
+    saddr = &(((struct sockaddr_in *) addr)->sin_addr);
+  else
+    saddr = &(((struct sockaddr_in6 *) addr)->sin6_addr);
+
+  fprintf(stdout, "%s\n", inet_ntop(af, saddr, buf, INET6_ADDRSTRLEN));
 }
 
 static struct addrinfo *get_addresses(const char *node)
@@ -55,7 +63,7 @@ int main(int argc, char **argv)
   struct addrinfo *res, *res0 = get_addresses(*(argv + optind));
 
   for (res = res0; res; res = res->ai_next) {
-    print_addr(&(((struct sockaddr_in *) res->ai_addr)->sin_addr));
+    print_address(res->ai_family, (struct sockaddr *) res->ai_addr);
 
     if (!all)
       break;
