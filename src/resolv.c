@@ -10,69 +10,69 @@
 
 static void print_address(int af, struct sockaddr *addr)
 {
-  char buf[INET6_ADDRSTRLEN];
-  void *saddr;
+	char buf[INET6_ADDRSTRLEN];
+	void *saddr;
 
-  if (af == AF_INET)
-    saddr = &(((struct sockaddr_in *) addr)->sin_addr);
-  else
-    saddr = &(((struct sockaddr_in6 *) addr)->sin6_addr);
+	if (af == AF_INET)
+		saddr = &(((struct sockaddr_in *) addr)->sin_addr);
+	else
+		saddr = &(((struct sockaddr_in6 *) addr)->sin6_addr);
 
-  fprintf(stdout, "%s\n", inet_ntop(af, saddr, buf, INET6_ADDRSTRLEN));
+	fprintf(stdout, "%s\n", inet_ntop(af, saddr, buf, INET6_ADDRSTRLEN));
 }
 
 static struct addrinfo *get_addresses(int af, const char *node)
 {
-  struct addrinfo hints, *res;
+	struct addrinfo hints, *res;
 
-  memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_family = af;
-  hints.ai_socktype = SOCK_RAW;
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = af;
+	hints.ai_socktype = SOCK_RAW;
 
-  int gaierr = getaddrinfo(node, NULL, &hints, &res);
+	int gaierr = getaddrinfo(node, NULL, &hints, &res);
 
-  if (gaierr != 0) {
-    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaierr));
-    exit(EXIT_FAILURE);
-  }
+	if (gaierr != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaierr));
+		exit(EXIT_FAILURE);
+	}
 
-  return res;
+	return res;
 }
 
 int main(int argc, char **argv)
 {
-  int all = 0, af = AF_INET;
-  int c;
+	int all = 0, af = AF_INET;
+	int c;
 
-  while ((c = getopt(argc, argv, "a6")) != -1) {
-    switch (c) {
-    case 'a':
-      all = 1;
-      break;
-    case '6':
-      af = AF_INET6;
-      break;
-    case '?':
-    default:
-      return 1;
-    }
-  }
+	while ((c = getopt(argc, argv, "a6")) != -1) {
+		switch (c) {
+		case 'a':
+			all = 1;
+			break;
+		case '6':
+			af = AF_INET6;
+			break;
+		case '?':
+		default:
+			return 1;
+		}
+	}
 
-  if (argc - optind != 1) {
-    fprintf(stderr, "Usage: %s [-6] [-a] HOSTNAME\n", PACKAGE);
-    return 1;
-  }
+	if (argc - optind != 1) {
+		fprintf(stderr, "Usage: %s [-6] [-a] HOSTNAME\n", PACKAGE);
+		return 1;
+	}
 
-  struct addrinfo *res, *res0 = get_addresses(af, *(argv + optind));
+	struct addrinfo *res, *res0 = get_addresses(af, *(argv + optind));
 
-  for (res = res0; res; res = res->ai_next) {
-    print_address(res->ai_family, (struct sockaddr *) res->ai_addr);
+	for (res = res0; res; res = res->ai_next) {
+		print_address(res->ai_family, (struct sockaddr *) res->ai_addr);
 
-    if (!all)
-      break;
-  }
+		if (!all)
+			break;
+	}
 
-  freeaddrinfo(res0);
+	freeaddrinfo(res0);
 
-  return 0;
+	return 0;
 }
