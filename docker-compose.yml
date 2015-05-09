@@ -1,0 +1,48 @@
+autoscan:
+  image: develop/autotools
+  entrypoint: autoscan
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+aclocal:
+  image: develop/autotools
+  entrypoint: aclocal
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+autoheader:
+  image: develop/autotools
+  entrypoint: autoheader
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+autoconf:
+  image: develop/autotools
+  entrypoint: autoconf
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+automake:
+  image: develop/autotools
+  entrypoint: automake
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+autoreconf:
+  image: develop/autotools
+  entrypoint: autoreconf
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+configure:
+  image: develop/autotools
+  entrypoint: ./configure
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
+make:
+  image: develop/autotools
+  entrypoint: make
+  working_dir: "/work"
+  volumes:
+    - ".:/work"
